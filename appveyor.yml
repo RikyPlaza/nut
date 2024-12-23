@@ -15,8 +15,7 @@ image: Visual Studio 2022
 branches:
   # whitelist
   only:
-    - master
-    - /Windows/
+    - Appveyor_Windows_build
 
 platform: x64
 
