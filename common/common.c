@@ -1,7 +1,7 @@
 /* common.c - common useful functions
 
    Copyright (C) 2000  Russell Kroll <rkroll@exploits.org>
-   Copyright (C) 2021-2024  Jim Klimov <jimklimov+nut@gmail.com>
+   Copyright (C) 2021-2025  Jim Klimov <jimklimov+nut@gmail.com>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -158,6 +158,9 @@ static int would_reopen_sdbus(int r) {
 		case EPERM:
 		case EACCES:
 			return 0;
+
+		default:
+			break;
 	}
 
 	return 1;
@@ -659,6 +662,51 @@ int print_banner_once(const char *prog, int even_if_disabled)
 	return ret;
 }
 
+const char *suggest_doc_links(const char *progname, const char *progconf) {
+	static char	buf[LARGEBUF];
+
+	buf[0] = '\0';
+
+	if (progname) {
+		char	*s = NULL, *buf2 = xstrdup(xbasename(progname));
+		size_t	i;
+
+		for (i = 0; buf2[i]; i++) {
+			buf2[i] = tolower(buf2[i]);
+		}
+
+		if ((s = strstr(buf2, ".exe")) && strcmp(buf2, "nut.exe"))
+			*s = '\0';
+
+		snprintf(buf, sizeof(buf),
+			"For more information please ");
+#if defined(WITH_DOCS) && WITH_DOCS
+		/* FIXME: Currently all NUT tools and drivers are in same
+		 *  man page section for "System Management Programs".
+		 *  If this ever changes (e.g. clients like `upsc` can be
+		 *  a "User Program" just as well), we may need an extra
+		    method argument here.
+		 */
+		snprintfcat(buf, sizeof(buf),
+			"Read The Fine Manual ('man %s %s') and/or ",
+			MAN_SECTION_CMD_SYS, buf2);
+#endif
+		snprintfcat(buf, sizeof(buf),
+			"see\n\t%s/docs/man/%s.html\n",
+			NUT_WEBSITE_BASE, buf2);
+
+		free(buf2);
+	}
+
+	if (progconf)
+		snprintfcat(buf, sizeof(buf),
+			"%s check documentation and samples of %s\n",
+			progname ? "Also" : "Please",
+			progconf);
+
+	return buf;
+}
+
 /* enable writing upslog_with_errno() and upslogx() type messages to
    the syslog */
 void syslogbit_set(void)
@@ -964,11 +1012,7 @@ char * getprocname(pid_t pid)
 	 */
 	char	*procname = NULL;
 	size_t	procnamelen = 0;
-#ifdef UNIX_PATH_MAX
-	char	pathname[UNIX_PATH_MAX];
-#else
-	char	pathname[PATH_MAX];
-#endif
+	char	pathname[NUT_PATH_MAX];
 	struct stat	st;
 
 #ifdef WIN32
@@ -1425,11 +1469,7 @@ int compareprocname(pid_t pid, const char *procname, const char *progname)
 	size_t	procbasenamelen = 0, progbasenamelen = 0;
 	/* Track where the last dot is in the basename; 0 means none */
 	size_t	procbasenamedot = 0, progbasenamedot = 0;
-#ifdef UNIX_PATH_MAX
-	char	procbasename[UNIX_PATH_MAX], progbasename[UNIX_PATH_MAX];
-#else
-	char	procbasename[PATH_MAX], progbasename[PATH_MAX];
-#endif
+	char	procbasename[NUT_PATH_MAX], progbasename[NUT_PATH_MAX];
 
 	if (checkprocname_ignored(__func__)) {
 		ret = -3;
@@ -1621,7 +1661,7 @@ finish:
    depending on the .exe path */
 char * getfullpath(char * relative_path)
 {
-	char buf[MAX_PATH];
+	char buf[NUT_PATH_MAX];
 	if ( GetModuleFileName(NULL, buf, sizeof(buf)) == 0 ) {
 		return NULL;
 	}
@@ -1642,7 +1682,7 @@ char * getfullpath(char * relative_path)
 void writepid(const char *name)
 {
 #ifndef WIN32
-	char	fn[SMALLBUF];
+	char	fn[NUT_PATH_MAX];
 	FILE	*pidf;
 	mode_t	mask;
 
@@ -2017,11 +2057,167 @@ int snprintfcat(char *dst, size_t size, const char *fmt, ...)
 	return (int)len + ret;
 }
 
+/*****************************************************************************
+ * String methods for space-separated token lists, used originally in dstate *
+ *****************************************************************************/
+
+/* Return non-zero if "string" contains "token" (case-sensitive),
+ * either surrounded by space character(s) or start/end of "string",
+ * or 0 if that token is not there, or if either string is NULL or empty.
+ */
+int	str_contains_token(const char *string, const char *token)
+{
+	char	*s = NULL;
+	size_t	offset = 0, toklen = 0;
+
+	if (!token || !*token || !string || !*string)
+		return 0;
+
+	s = strstr(string, token);
+	toklen = strlen(token);
+
+repeat:
+	/* not found or hit end of line */
+	if (!s || !*s)
+		return 0;
+
+	offset = s - string;
+#ifdef DEBUG
+	upsdebugx(3, "%s: '%s' in '%s': offset=%" PRIuSIZE" toklen=%" PRIuSIZE" s[toklen]='0x%2X'\n",
+		__func__, token, string, offset, toklen, s[toklen]);
+#endif
+	if (offset == 0 || string[offset - 1] == ' ') {
+		/* We have hit the start of token */
+		if (s[toklen] == '\0' || s[toklen] == ' ') {
+			/* And we have hit the end of token */
+			return 1;
+		}
+	}
+
+	/* token was a substring of some other token */
+	s = strstr(s + 1, token);
+	goto repeat;
+}
+
+/* Add "token" to end of string "tgt", if it is not yet there
+ * (prefix it with a space character if "tgt" is not empty).
+ * Return 0 if already there, 1 if token was added successfully,
+ * -1 if we needed to add it but it did not fit under the tgtsize limit,
+ * -2 if either string was NULL or "token" was empty.
+ * NOTE: If token contains space(s) inside, recurse to treat it
+ * as several tokens to add independently.
+ * Optionally calls "callback_always" (if not NULL) after checking
+ * for spaces (and maybe recursing) and before checking if the token
+ * is already there, and/or "callback_unique" (if not NULL) after
+ * checking for uniqueness and going to add a newly seen token.
+ * If such callback returns 0, abort the addition of token.
+ */
+int	str_add_unique_token(char *tgt, size_t tgtsize, const char *token,
+			    int (*callback_always)(char *, size_t, const char *),
+			    int (*callback_unique)(char *, size_t, const char *)
+)
+{
+	size_t	toklen = 0, tgtlen = 0;
+
+#ifdef DEBUG
+	upsdebugx(3, "%s: '%s'\n", __func__, token);
+#endif
+
+	if (!tgt || !token || !*token)
+		return -2;
+
+	if (strstr(token, " ")) {
+		/* Recurse adding each sub-token one by one (avoid duplicates)
+		 * We frown upon adding "A FEW TOKENS" at once, but in e.g.
+		 * code with mapping tables this is not easily avoidable...
+		 */
+		char	*tmp = xstrdup(token), *p = tmp, *s = tmp;
+		int	retval = -2, ret = 0;
+
+		while (*p) {
+			if (*p == ' ') {
+				*p = '\0';
+				if (s != p) {
+					/* Only recurse to set non-trivial tokens */
+					ret = str_add_unique_token(tgt, tgtsize, s, callback_always, callback_unique);
+
+					/* Only remember this ret if we are just
+					 * starting, or it is a failure, or
+					 * if we never failed and keep up the
+					 * successful streak */
+					if ( (retval == -2)
+					||   (ret < 0)
+					||   (retval >= 0 && ret >= retval) )
+						retval = ret;
+				}
+				p++;
+				s = p;	/* Start of new word... or a consecutive space to ignore on next cycle */
+			} else {
+				p++;
+			}
+		}
+
+		if (s != p) {
+			/* Last valid token did end with (*p=='\0') */
+			ret = str_add_unique_token(tgt, tgtsize, s, callback_always, callback_unique);
+			if ( (retval == -2)
+			||   (ret < 0)
+			||   (retval >= 0 && ret >= retval) )
+				retval = ret;
+		}
+
+		free(tmp);
+
+		/* Return 0 if all tokens were already there,
+		 * or 1 if all tokens were successfully added
+		 * (and there was at least one non-trivial token) */
+		return retval;
+	}
+
+	if (callback_always) {
+		int	cbret = callback_always(tgt, tgtsize, token);
+		if (!cbret) {
+			upsdebugx(2, "%s: skip token '%s': due to callback_always()", __func__, token);
+			return -3;
+		}
+	}
+
+	if (str_contains_token(tgt, token)) {
+		upsdebugx(2, "%s: skip token '%s': was already set", __func__, token);
+		return 0;
+	}
+
+	if (callback_unique) {
+		int	cbret = callback_unique(tgt, tgtsize, token);
+		if (!cbret) {
+			upsdebugx(2, "%s: skip token '%s': due to callback_unique()", __func__, token);
+			return -3;
+		}
+	}
+
+	/* separate with a space if multiple elements are present */
+	toklen = strlen(token);
+	tgtlen = strlen(tgt);
+
+	if (tgtsize < (tgtlen + (tgtlen > 0 ? 1 : 0) + toklen + 1)) {
+		upsdebugx(1, "%s: skip token '%s': too long for target string", __func__, token);
+		return -1;
+	}
+
+	if (snprintfcat(tgt, tgtsize, "%s%s", (tgtlen > 0) ? " " : "", token) < 0) {
+		upsdebugx(1, "%s: error adding token '%s': snprintfcat() failed", __func__, token);
+		return -1;
+	}
+
+	/* Added successfully */
+	return 1;
+}
+
 /* lazy way to send a signal if the program uses the PIDPATH */
 #ifndef WIN32
 int sendsignal(const char *progname, int sig, int check_current_progname)
 {
-	char	fn[SMALLBUF];
+	char	fn[NUT_PATH_MAX];
 
 	snprintf(fn, sizeof(fn), "%s/%s.pid", rootpidpath(), progname);
 
@@ -2754,7 +2950,7 @@ static void vupslog(int priority, const char *fmt, va_list va, int use_strerror)
 {
 	int	ret, errno_orig = errno;
 	size_t	bufsize = LARGEBUF;
-	char	*buf = xcalloc(sizeof(char), bufsize);
+	char	*buf = xcalloc(bufsize, sizeof(char));
 
 	/* Be pedantic about our limitations */
 	bufsize *= sizeof(char);
@@ -3040,11 +3236,7 @@ const char * rootpidpath(void)
 /* Die with a standard message if socket filename is too long */
 void check_unix_socket_filename(const char *fn) {
 	size_t len = strlen(fn);
-#ifdef UNIX_PATH_MAX
-	size_t max = UNIX_PATH_MAX;
-#else
-	size_t max = PATH_MAX;
-#endif
+	size_t max = NUT_PATH_MAX;
 #ifndef WIN32
 	struct sockaddr_un	ssaddr;
 	max = sizeof(ssaddr.sun_path);
@@ -3060,6 +3252,8 @@ void check_unix_socket_filename(const char *fn) {
 	 * varying 104-108 bytes (UNIX_PATH_MAX)
 	 * as opposed to PATH_MAX or MAXPATHLEN
 	 * typically of a kilobyte range.
+	 * We define NUT_PATH_MAX as the greatest
+	 * value of them all.
 	 */
 	fatalx(EXIT_FAILURE,
 		"Can't create a unix domain socket: pathname '%s' "
@@ -3687,7 +3881,7 @@ void nut_prepare_search_paths(void) {
 	count_builtin = i + 1;	/* +1 for the NULL */
 
 	/* Bytes inside should all be zeroed... */
-	filtered_search_paths = xcalloc(sizeof(const char *), count_builtin);
+	filtered_search_paths = xcalloc(count_builtin, sizeof(const char *));
 
 	/* FIXME: here "count_builtin" means size of filtered_search_paths[]
 	 * and may later be more, if we would consider other data sources */
@@ -3842,12 +4036,12 @@ static char * get_libname_in_dir(const char* base_libname, size_t base_libname_l
 	DIR *dp;
 	struct dirent *dirp;
 	char *libname_path = NULL, *libname_alias = NULL;
-	char current_test_path[LARGEBUF];
+	char current_test_path[NUT_PATH_MAX];
 
 	upsdebugx(3, "%s('%s', %" PRIuSIZE ", '%s', %i): Entering method...",
 		__func__, base_libname, base_libname_length, dirname, index);
 
-	memset(current_test_path, 0, LARGEBUF);
+	memset(current_test_path, 0, sizeof(current_test_path));
 
 	if ((dp = opendir(dirname)) == NULL) {
 		if (index >= 0) {
@@ -3890,7 +4084,7 @@ static char * get_libname_in_dir(const char* base_libname, size_t base_libname_l
 				continue;
 			}
 
-			snprintf(current_test_path, LARGEBUF, "%s/%s", dirname, dirp->d_name);
+			snprintf(current_test_path, sizeof(current_test_path), "%s/%s", dirname, dirp->d_name);
 #if HAVE_DECL_REALPATH
 			libname_path = realpath(current_test_path, NULL);
 #else
@@ -4250,7 +4444,7 @@ int match_regex_hex(const regex_t *preg, const int n)
 {
 	char	buf[10];
 
-	snprintf(buf, sizeof(buf), "%04x", n);
+	snprintf(buf, sizeof(buf), "%04x", (unsigned int)n);
 
 	return match_regex(preg, buf);
 }

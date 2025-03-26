@@ -1,4 +1,4 @@
-personal_ws-1.1 en 3270 utf-8
+personal_ws-1.1 en 3353 utf-8
 AAC
 AAS
 ABI
@@ -205,6 +205,7 @@ Checksum
 Christoph
 Chu
 Cichowski
+CipherString
 CircleCI
 Claesson
 CodingStyle
@@ -243,7 +244,10 @@ DELPHYS
 DELRANGE
 DES
 DESTDIR
+DEVICEALARM
 DEVNAME
+DEVREL
+DEXP
 DF
 DHEA
 DIGYS
@@ -330,6 +334,7 @@ ESXi
 ETIME
 EUROCASE
 EXtreme
+EcoFlow
 Economou
 EditorConfig
 Edlman
@@ -346,11 +351,13 @@ Eltek
 Emilien
 Energia
 EnergySaving
+Enphase's
 Erikson
 Eriksson
 Evgeny
 Exar
 ExecCGI
+ExecStart
 ExecStartPre
 FD
 FEMEA
@@ -403,11 +410,13 @@ GES
 GETADDRINFO
 GETPID
 GID
+GITREV
 GND
 GNUmakefile
 GObject
 GPIO
 GPL
+GPLv
 GPSER
 GRs
 GTK
@@ -507,6 +516,7 @@ INTERR
 INTL
 INV
 INVOLT
+IOPlatformPluginFamily
 IPAR
 IPC
 IPM
@@ -538,6 +548,7 @@ JRE
 JSON
 JVM
 JW
+JWT
 Jageson
 Jarosch
 Jasuny
@@ -556,6 +567,7 @@ KRTS
 KSTAR
 KTTS
 Kain
+Kajetan
 Kaminski
 Kanji
 Kazancev
@@ -590,6 +602,7 @@ LEDs
 LGTM
 LH
 LIBGD
+LIBGPIO
 LIBNEON
 LIBNETSNMP
 LIBOPENSSL
@@ -604,7 +617,9 @@ LISTRW
 LISTVARS
 LLDB
 LLNC
+LOADKWH
 LOADPCT
+LOCALSTATE
 LOCKFN
 LOCKNAME
 LOTRANS
@@ -646,7 +661,6 @@ MBATTCHG
 MCU
 MDigest
 MEC
-MEGATAEC
 MERCHANTABILITY
 MF
 MH
@@ -768,6 +782,7 @@ Nadav
 Nagios
 Nash
 NaturalDocs
+Naur
 Necedah
 NetBSD
 NetBeans
@@ -830,6 +845,7 @@ OpenSSL
 OpenSolaris
 OpenSource
 OpenUPS
+OpenWRT
 Opengear
 Opensource
 Opti
@@ -892,11 +908,13 @@ PULS
 PV
 PWR
 PXG
+PYTHONIOENCODING
 PYTHONPATH
 PaaS
 Pac
 PackageRequired
 Parisi
+PartOf
 Patrik
 Pavel
 Pawe
@@ -1037,6 +1055,7 @@ René
 Repotec's
 Repoteck
 RequireAny
+RestartSec
 Richthof
 Rickard
 Ridgway
@@ -1052,6 +1071,7 @@ RunAs
 RunUPSCommand
 RxD
 Ryabov
+Rzepecki
 SAI
 SASU
 SCM
@@ -1062,12 +1082,14 @@ SDE
 SDFLAG
 SDR
 SDT
+SECCTRL
 SELFTEST
 SELinux
 SENTR
 SER
 SERIALNO
 SERVER's
+SESS
 SETFL
 SETINFOs
 SETLK
@@ -1103,6 +1125,7 @@ SNR
 SOCK
 SOCKADDR
 SOCKLEN
+SOCOMECUPS
 SOFF
 SOLA
 SOMECO
@@ -1114,6 +1137,7 @@ SPECs
 SPLY
 SPS
 SRC
+SSD
 SSSS
 STARTTLS
 STB
@@ -1124,6 +1148,7 @@ STIME
 STO
 STP
 STRARG
+SUBDIRS
 SUNWlibusbugen
 SUNWugen
 SUNWusb
@@ -1155,6 +1180,7 @@ SerialNumber
 Serv
 Serveur
 SetRWVar
+Shambarger
 Shara
 ShareAlike
 Shaul
@@ -1250,6 +1276,7 @@ Tecnoware
 Tefft
 Telecom
 Temurin
+Termux
 Teurlings
 Thanos
 Thecus
@@ -1333,9 +1360,11 @@ VER
 VERFW
 VFI
 VIB
+VLAN
 VM
 VMIN
 VMM
+VMs
 VMware
 VNC
 VPATH
@@ -1424,6 +1453,7 @@ Yoyodyne
 Yukai
 Yunto
 ZFS
+ZP
 ZProject
 Zaika
 Zampieri
@@ -1458,6 +1488,7 @@ advorder
 ae
 aec
 af
+afeb
 aggregator
 ai
 aix
@@ -1486,7 +1517,9 @@ apcsmart
 apctest
 apcupsd
 aphel
+api
 apinames
+apis
 appveyor
 ar
 architecting
@@ -1625,6 +1658,7 @@ bypassOff
 bypassOn
 cStandard
 cablepower
+calc
 calloc
 cb
 cbe
@@ -1669,6 +1703,7 @@ chrooting
 chroots
 chunked
 chunking
+chunkname
 chv
 ci
 cidr
@@ -1686,6 +1721,7 @@ cmdname
 cmdparam
 cmds
 cmdvartab
+cnf
 codebase
 codepath
 coldstarts
@@ -1693,6 +1729,7 @@ collectd
 command's
 commandlen
 committer
+comms
 compat
 compilerPath
 conf
@@ -1718,10 +1755,12 @@ cppnit
 cppunit
 cpqpower
 cpsups
+cpu
 cr
 crestfactor
 crit
 criticality
+crle
 crlf
 cron
 crontab
@@ -1789,6 +1828,7 @@ descr
 desde
 designator
 dev
+devclient
 devctl
 devd
 devel
@@ -1881,6 +1921,7 @@ endl
 energizerups
 energysave
 english
+enphase
 enum
 env
 envvar
@@ -1906,9 +1947,11 @@ execfuse
 executables
 executeCommand
 execve
+extapi
 extern
 externalConsole
 extradata
+faa
 fabula
 facto
 fallthrough
@@ -1917,6 +1960,7 @@ fatalx
 fc
 fcb
 fcntl
+fcontext
 fd
 fdX
 fds
@@ -1993,6 +2037,7 @@ github
 gitignore
 gitk
 gitlab
+gitlog
 gmail
 gmake
 gmtime
@@ -2010,6 +2055,7 @@ gpiochip
 graphviz
 groupadd
 groupname
+gtec
 gtk
 guesstimate
 guesstimation
@@ -2156,6 +2202,7 @@ ish
 iso
 isolator
 iter
+ivp
 ivtscd
 jNUT
 jNut
@@ -2168,12 +2215,15 @@ jimklimov
 journalctl
 jpeg
 jpg
+jq
 jre
 json
 kVA
 kadets
 kaminski
 kde
+kex
+kext
 keychain
 keygen
 keyout
@@ -2234,6 +2284,7 @@ libnut
 libnutclient
 libnutclientstub
 libnutclientsub
+libnutconf
 libnutconfig
 libnutscan
 libpcre
@@ -2266,6 +2317,7 @@ liebertgxt
 lifecycle
 linevoltage
 linkdoc
+linkmanext
 linksingledoc
 linksrcdoc
 linux
@@ -2273,6 +2325,7 @@ linuxdoc
 lipo
 listDeviceClients
 littleguy
+livedata
 lk
 lldb
 llvm
@@ -2344,6 +2397,7 @@ mc
 mcedit
 md
 mdadm
+mdutil
 mecer
 megatec
 memset
@@ -2430,6 +2484,7 @@ natively
 nb
 nbproject
 nbr
+nc
 nd
 nds
 netcat
@@ -2462,6 +2517,7 @@ noAuthNoPriv
 nobody's
 nobreak
 nobt
+nocomms
 nodev
 nodownload
 noexec
@@ -2474,6 +2530,7 @@ nolock
 nombattvolt
 noncommercially
 noout
+nooutstats
 norating
 noro
 noscanlangid
@@ -2542,17 +2599,20 @@ openlog
 openmp
 openssh
 openssl
+oper
 optimizations
 optiups
 oq
 os
 ostream
+other's
 otheruser
 outliers
 ovmf
 pF
 pacman
 pacstrap
+parallelizable
 parallelized
 param
 parsable
@@ -2590,6 +2650,7 @@ pigz
 pijuice
 pinout
 pinouts
+pipedebug
 pipename
 pixmaps
 pkg
@@ -2607,6 +2668,8 @@ pollfreq
 pollinterval
 pollonly
 popa
+portfile
+portfiles
 portname
 porttype
 posix
@@ -2672,7 +2735,9 @@ py
 pycparser
 pydoc
 pygments
+pygtk
 pynut
+pyqt
 qDEB
 qa
 qemu
@@ -2685,6 +2750,7 @@ qxflags
 rD
 raritan
 rb
+rc
 rcctl
 readline
 readonly
@@ -2696,6 +2762,8 @@ rebasing
 rebootdelay
 rebranded
 reconnection
+recurses
+recursing
 recv
 redistributors
 reentrancy
@@ -2717,6 +2785,7 @@ repotec
 req
 resetter
 resolv
+restoreconf
 resync
 ret
 retrydelay
@@ -2740,6 +2809,7 @@ roadmap
 rootca
 rootfs
 rootfs'es
+rpc
 rq
 rqt
 rsa
@@ -2780,11 +2850,13 @@ se
 searchable
 secLevel
 secName
+secctrl
 secretpass
 securityLevel
 securityName
 sed
 selftest
+semanage
 semver
 sendback
 sendline
@@ -2866,13 +2938,16 @@ something's
 sp
 spanish
 sparc
+sparcv
 spectype
 spellcheck
 splitaddr
 splitname
+squasher
 sr
 src
 srcdir
+srcdoc
 srv
 srw
 ss
@@ -2963,6 +3038,7 @@ syslogd
 systemctl
 systemd
 systemdshutdowndir
+systemdsystempresetdir
 systemdsystemunitdir
 systemdtmpfilesdir
 systemtest
@@ -2988,6 +3064,8 @@ testtime
 testuser
 textproc
 tgcware
+tgt
+tgtsize
 tgz
 th
 timeframe
@@ -3011,6 +3089,7 @@ tport
 tripplite
 tripplitesu
 troff
+tsa
 tsd
 tty
 ttyACM
@@ -3024,7 +3103,9 @@ ttyb
 ttyc
 ttymode
 ttyp
+tunables
 tuple
+tuples
 turnon
 tv
 tw
@@ -3210,6 +3291,7 @@ wix
 wmNUT
 wmnut
 workflow
+workflows
 workspace
 workspaceFolder
 workspaces

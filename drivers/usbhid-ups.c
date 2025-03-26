@@ -6,7 +6,7 @@
  *   2005-2006 Peter Selinger <selinger@users.sourceforge.net>
  *   2007-2009 Arjen de Korte <adkorte-guest@alioth.debian.org>
  *   2016      Eaton / Arnaud Quette <ArnaudQuette@Eaton.com>
- *   2020-2024 Jim Klimov <jimklimov+nut@gmail.com>
+ *   2020-2025 Jim Klimov <jimklimov+nut@gmail.com>
  *
  * This program was sponsored by MGE UPS SYSTEMS, and now Eaton
  *
@@ -29,7 +29,7 @@
  */
 
 #define DRIVER_NAME	"Generic HID driver"
-#define DRIVER_VERSION	"0.60"
+#define DRIVER_VERSION	"0.62"
 
 #define HU_VAR_WAITBEFORERECONNECT "waitbeforereconnect"
 
@@ -55,6 +55,7 @@
 #	include "belkin-hid.h"
 #	include "cps-hid.h"
 #	include "delta_ups-hid.h"
+#	include "ecoflow-hid.h"
 #	include "ever-hid.h"
 #	include "idowell-hid.h"
 #	include "legrand-hid.h"
@@ -79,6 +80,7 @@ static subdriver_t *subdriver_list[] = {
 	&belkin_subdriver,
 	&cps_subdriver,
 	&delta_ups_subdriver,
+	&ecoflow_subdriver,
 	&ever_subdriver,
 	&idowell_subdriver,
 	&legrand_subdriver,
@@ -571,7 +573,7 @@ static const char *hex_conversion_fun(double value)
 {
 	static char buf[20];
 
-	snprintf(buf, sizeof(buf), "%08lx", (long)value);
+	snprintf(buf, sizeof(buf), "%08lx", (unsigned long)value);
 
 	return buf;
 }
@@ -912,6 +914,10 @@ int instcmd(const char *cmdname, const char *extradata)
 
 	/* If extradata is empty, use the default value from the HID-to-NUT table */
 	val = extradata ? extradata : hidups_item->dfl;
+	if (!val) {
+		upsdebugx(2, "instcmd: %s requires an explicit parameter\n", cmdname);
+		return STAT_INSTCMD_CONVERSION_FAILED;
+	}
 
 	/* Lookup the new value if needed */
 	if (hidups_item->hid2info != NULL) {
@@ -1025,9 +1031,7 @@ void upsdrv_help(void)
 			printf(", ");
 		printf("\"%s\"", subdriver_list[i]->name);
 	}
-	printf("\n\n");
-
-	printf("Read The Fine Manual ('man 8 usbhid-ups')\n");
+	printf("\n");
 }
 
 void upsdrv_makevartable(void)
